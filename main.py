@@ -1,9 +1,11 @@
-from HairlineTrackerGUI import HairlineTrackerGUI
+"""main.py"""
 import tkinter as tk
+from HairlineTrackerGUI import HairlineTrackerGUI
 
 def main():
+    """ Main method for the program"""
     root = tk.Tk()
-    app = HairlineTrackerGUI(root)
+    HairlineTrackerGUI(root)
     root.mainloop()
 
 if __name__ == "__main__":
