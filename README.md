@@ -71,7 +71,10 @@ All processed images and analysis data are stored locally in the `hairline_data`
 
 ## Notes
 
-- For best results, use well-lit (try using flash) photos taken from the same angle
-- Use a plain white background
+- For best results,
+   - Use well-lit (try using flash) photos taken from the same angle
+   - Use photos with your entire face to include all facial features
+   - Use a comb to push your hair back (wet hair make it easier to eliminate stray strands)
+   - Use a plain white background
 - Consistent lighting and positioning will improve tracking accuracy
 - At least two images are required for comparison and analysis features

@@ -146,7 +146,7 @@ class HairlineTracker:
         forehead_right = min(int(right_eye[0] + eye_distance * 0.8), img.shape[1]) # 0.9
 
         # detect hairline
-        hairline_points, hairline_img = self.detect_hairline_from_eyes(
+        hairline_points, hairline_img = self.detect_hairline(
             img,
             forehead_top,
             forehead_height,
@@ -161,7 +161,7 @@ class HairlineTracker:
             distance = np.sqrt((point[0] - eye_midpoint[0])**2 + (point[1] - eye_midpoint[1])**2)
             hairline_distances.append(float(distance))
 
-        # dummy landmarks and face_rect for consistent data structure
+        # empty landmarks and face_rect for consistency
         aligned_points = [(0, 0)] * 68  # empty landmarks
         aligned_points[36:42] = [(left_eye[0], left_eye[1])] * 6  # right eye points
         aligned_points[42:48] = [(right_eye[0], right_eye[1])] * 6  # left eye points
@@ -203,7 +203,7 @@ class HairlineTracker:
         filtered_points = [point for point in hairline_points if lower_bound <= point[1]]
         return filtered_points
 
-    def detect_hairline_from_eyes(self, img, forehead_top, forehead_bottom, forehead_left, forehead_right, eye_midpoint):
+    def detect_hairline(self, img, forehead_top, forehead_bottom, forehead_left, forehead_right, eye_midpoint):
         """Detect the hairline using just eye positions as reference."""
         # image copy
         result_img = img.copy()
