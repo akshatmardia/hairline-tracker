@@ -67,7 +67,7 @@ The application uses computer vision techniques to:
 
 ## Data Storage
 
-All processed images and analysis data are stored locally in the `data` directory.
+All processed images and analysis data are stored locally in the `hairline_data` directory.
 
 ## Notes
 
