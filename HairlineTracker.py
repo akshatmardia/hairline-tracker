@@ -248,7 +248,7 @@ class HairlineTracker:
                 continue
 
             # column lines for debugging
-            cv2.line(result_img, (col_center + forehead_left, forehead_top), (col_center + forehead_left, forehead_bottom), (255, 255, 255), 1)
+            # cv2.line(result_img, (col_center + forehead_left, forehead_top), (col_center + forehead_left, forehead_bottom), (255, 255, 255), 1)
 
             column = forehead_edges[:, col_center]
 
