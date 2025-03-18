@@ -101,7 +101,7 @@ class HairlineTracker:
             "hairline_points": processed_data["hairline_points"],
         }
 
-        # store landmark data separately since it is in a pickle file
+        # store landmark data separately in a pickle file
         self.landmark_data[timestamp] = {
             "landmarks": processed_data["landmarks"],
             "face_rect": processed_data["face_rect"]
@@ -120,30 +120,34 @@ class HairlineTracker:
         # convert to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # eye detection
-        eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
-        eyes = eye_cascade.detectMultiScale(gray, 1.1, 3)
-        # if both eyes not found, throw error
-        if len(eyes) < 2:
-            print("Couldn't detect both eyes. Please ensure eyes are clearly visible.")
+        # get face
+        faces = self.face_detector(gray)
+        if len(faces) == 0:
+            print("Error: No face detected. Please ensure a face is clearly visible.")
             return None
-
-        # sort eyes by x-coord to determine left and right
-        eyes = sorted(eyes, key=lambda x: x[0])
-
-        # align image using eyes
-        left_eye = (eyes[0][0] + eyes[0][2]//2, eyes[0][1] + eyes[0][3]//2)
-        right_eye = (eyes[1][0] + eyes[1][2]//2, eyes[1][1] + eyes[1][3]//2)
+        face = faces[0]
+        
+        # get facial landmarks
+        landmarks = self.predictor(gray, face)
+        
+        # find the centers of each eye
+        left_eye_x = int(np.mean([landmarks.part(i).x for i in range(36, 42)]))
+        left_eye_y = int(np.mean([landmarks.part(i).y for i in range(36, 42)]))
+        right_eye_x = int(np.mean([landmarks.part(i).x for i in range(42, 48)]))
+        right_eye_y = int(np.mean([landmarks.part(i).y for i in range(42, 48)]))
+        
+        left_eye = (left_eye_x, left_eye_y)
+        right_eye = (right_eye_x, right_eye_y)
 
         # estimate forehead region based on eye positions
         eye_midpoint = ((left_eye[0] + right_eye[0]) // 2, (left_eye[1] + right_eye[1]) // 2)
         eye_distance = np.sqrt((right_eye[0] - left_eye[0])**2 + (right_eye[1] - left_eye[1])**2)
 
-        # estimate forehead region
-        forehead_height = max(int(eye_midpoint[1] - eye_distance * 1.2), 0)  # start 120% of eye_distance above eyes
-        forehead_top = max(int(forehead_height - eye_distance * 0.4), 0)  # go up by 40% of eye_distance
-        forehead_left = max(int(left_eye[0] - eye_distance * 0.5), 0) # 0.5
-        forehead_right = min(int(right_eye[0] + eye_distance * 0.8), img.shape[1]) # 0.9
+        # estimate forehead region (might have to edit based on person)
+        forehead_height = max(int(eye_midpoint[1] - eye_distance * 0.9), 0)  # start 90% of eye_distance above eyes
+        forehead_top = max(int(forehead_height - eye_distance * 0.6), 0)  # go up by 60% of eye_distance
+        forehead_left = max(int(left_eye[0] - eye_distance * 0.6), 0)
+        forehead_right = min(int(right_eye[0] + eye_distance * 0.6 ), img.shape[1])
 
         # detect hairline
         hairline_points, hairline_img = self.detect_hairline(
@@ -154,6 +158,11 @@ class HairlineTracker:
             forehead_right,
             eye_midpoint
         )
+
+        # DEBUGGING
+        # cv2.circle(hairline_img, (left_eye[0], left_eye[1]), 5, (0, 255, 0), -1) # green
+        # cv2.circle(hairline_img, (right_eye[0], right_eye[1]), 5, (255, 0, 0), -1) # blue
+        # cv2.circle(hairline_img, (eye_midpoint[0], eye_midpoint[1]), 5, (0, 0, 255), -1) # red
 
         # calculate distances from eye midpoint to each hairline point
         hairline_distances = []
@@ -204,7 +213,6 @@ class HairlineTracker:
         return filtered_points
 
     def detect_hairline(self, img, forehead_top, forehead_bottom, forehead_left, forehead_right, eye_midpoint):
-        """Detect the hairline using just eye positions as reference."""
         # image copy
         result_img = img.copy()
         ### TESTING
@@ -239,8 +247,8 @@ class HairlineTracker:
             if col_center >= forehead_edges.shape[1]:
                 continue
 
-            # debugging column lines
-            # cv2.line(result_img, (col_center + forehead_left, forehead_top), (col_center + forehead_left, forehead_bottom), (0, 0, 255), 1)
+            # column lines for debugging
+            cv2.line(result_img, (col_center + forehead_left, forehead_top), (col_center + forehead_left, forehead_bottom), (255, 255, 255), 1)
 
             column = forehead_edges[:, col_center]
 

@@ -175,4 +175,5 @@ cython_debug/
 
 # Directories
 hairline_data/
+hairline_data2/
 tracker-venv/
