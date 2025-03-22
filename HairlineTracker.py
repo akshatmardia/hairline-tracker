@@ -375,6 +375,23 @@ class HairlineTracker:
 
         return chart_path
 
+    def pad_and_stack(self, img1, img2):
+        h1, w1 = img1.shape[:2]
+        h2, w2 = img2.shape[:2]
+        target_height = max(h1, h2)
+
+        def pad_image(img, target_height):
+            h, w = img.shape[:2]
+            pad_bottom = target_height - h
+            return cv2.copyMakeBorder(img, 0, pad_bottom, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+
+        if h1 < target_height:
+            img1 = pad_image(img1, target_height)
+        if h2 < target_height:
+            img2 = pad_image(img2, target_height)
+
+        return np.hstack((img1, img2))
+
     def create_comparison_image(self, timestamp1, timestamp2):
         # find entries
         entry1 = next((e for e in self.tracking_data["entries"] if e["timestamp"] == timestamp1), None)
@@ -391,7 +408,8 @@ class HairlineTracker:
             return None
 
         # create comparison image
-        comparison = np.hstack((img1, img2))
+        # comparison = np.hstack((img1, img2))
+        comparison = self.pad_and_stack(img1, img2)
 
         # add text labels
         cv2.putText(comparison, timestamp1, (10, 30),

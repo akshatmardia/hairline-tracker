@@ -1,7 +1,10 @@
 # Hairline Tracker
 
 A GUI application for tracking and analyzing hairline changes over time using computer vision.
-Check out the demo video here: 
+
+Check out the demo video here:
+
+[![thumbnail](https://img.youtube.com/vi/JtgaoU93Doo/0.jpg)](https://youtu.be/JtgaoU93Doo)
 
 ## Features
 
